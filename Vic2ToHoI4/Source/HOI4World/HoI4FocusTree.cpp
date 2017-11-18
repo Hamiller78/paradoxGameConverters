@@ -521,9 +521,6 @@ void HoI4FocusTree::addGenericFocusTree(const set<string>& majorIdeologies)
 	newFocus->completionReward += "							}\n";
 	newFocus->completionReward += "						}\n";
 	newFocus->completionReward += "					}\n";
-	newFocus->completionReward += "					any_owned_state = {\n";
-	newFocus->completionReward += "						is_coastal = yes\n";
-	newFocus->completionReward += "					}\n";
 	newFocus->completionReward += "				}\n";
 	newFocus->completionReward += "				random_owned_controlled_state = {\n";
 	newFocus->completionReward += "					limit = {\n";
@@ -1639,7 +1636,7 @@ void HoI4FocusTree::addGenericFocusTree(const set<string>& majorIdeologies)
 	}
 	else
 	{
-		newFocus->prerequisites.push_back("focus = foreign_expeditions focus = deterrence");
+		newFocus->prerequisites.push_back("focus = deterrence");
 	}
 	newFocus->available += "			OR = {\n";
 	newFocus->available += "				threat > 0.75\n";
@@ -1859,13 +1856,6 @@ void HoI4FocusTree::addFascistGenericFocuses()
 	newFocus->completionReward += "					ideology = fascism\n";
 	newFocus->completionReward += "					popularity = 0.2\n";
 	newFocus->completionReward += "				}\n";
-	newFocus->completionReward += "			}\n";
-	newFocus->completionReward += "			if = {\n";
-	newFocus->completionReward += "				limit = { has_government = communism }\n";
-	newFocus->completionReward += "				add_popularity = {\n";
-	newFocus->completionReward += "					ideology = communism\n";
-	newFocus->completionReward += "					popularity = 0.2\n";
-	newFocus->completionReward += "				}\n";
 	newFocus->completionReward += "			}";
 	focuses.push_back(newFocus);
 
@@ -1953,13 +1943,6 @@ void HoI4FocusTree::addCommunistGenericFocuses()
 	newFocus->cost = 10;
 	newFocus->availableIfCapitulated = true;
 	newFocus->completionReward += "			add_ideas = political_commissars_focus\n";
-	newFocus->completionReward += "			if = {\n";
-	newFocus->completionReward += "				limit = { has_government = fascism }\n";
-	newFocus->completionReward += "				add_popularity = {\n";
-	newFocus->completionReward += "					ideology = fascism\n";
-	newFocus->completionReward += "					popularity = 0.2\n";
-	newFocus->completionReward += "				}\n";
-	newFocus->completionReward += "			}\n";
 	newFocus->completionReward += "			if = {\n";
 	newFocus->completionReward += "				limit = { has_government = communism }\n";
 	newFocus->completionReward += "				add_popularity = {\n";
@@ -2658,16 +2641,16 @@ void HoI4FocusTree::addAbsolutistEmpireNationalFocuses(const HoI4Country* Home, 
 	newFocus->aiWillDo += "			factor = 10\n";
 	newFocus->aiWillDo += "			modifier = {\n";
 	newFocus->aiWillDo += "			}";
-	newFocus->completionReward += "			add_ideas = established_traders";
-	newFocus->completionReward += "			set_country_flag = established_traders";
+	newFocus->completionReward += "			add_ideas = established_traders\n";
+	newFocus->completionReward += "			set_country_flag = established_traders\n";
 	newFocus->completionReward += "			random_owned_state = {\n";
 	newFocus->completionReward += "				limit = {\n";
 	newFocus->completionReward += "					free_building_slots = {\n";
 	newFocus->completionReward += "						building = infrastructure\n";
 	newFocus->completionReward += "						size > 0\n";
 	newFocus->completionReward += "						include_locked = yes\n";
-	newFocus->completionReward += "						is_coastal = yes\n";
 	newFocus->completionReward += "					}\n";
+	newFocus->completionReward += "						is_coastal = yes\n";
 	newFocus->completionReward += "					OR = {\n";
 	newFocus->completionReward += "						is_in_home_area = no\n";
 	newFocus->completionReward += "						NOT = {\n";

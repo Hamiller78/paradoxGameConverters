@@ -356,7 +356,7 @@ void HoI4Events::createSudetenEvent(const HoI4Country* Annexer, const HoI4Countr
 	sudetenEvent.id = "NFEvents." + to_string(nationalFocusEventNumber);
 	sudetenEvent.title = annexername + " Demands " + annexedname + "!";
 	sudetenEvent.description = "\"" + annexername + " has recently been making claims to our bordering states, saying that these states are full of " + Annexer->getSourceCountry()->getAdjective("english") + " people and that the territory should be given to them. Although it ";
-	sudetenEvent.description = "is true that recently our neighboring states have had an influx of " + Annexer->getSourceCountry()->getAdjective("english") + " people in the recent years, we cannot give up our lands because a few " + Annexer->getSourceCountry()->getAdjective("english") + " settled down in our land. ";
+	sudetenEvent.description += "is true that recently our neighboring states have had an influx of " + Annexer->getSourceCountry()->getAdjective("english") + " people in the recent years, we cannot give up our lands because a few " + Annexer->getSourceCountry()->getAdjective("english") + " settled down in our land. ";
 	sudetenEvent.description += "In response " + annexername + " has called for a conference, demanding their territory in exchange for peace. How do we resond? ";
 	sudetenEvent.description += " Our people would be safe with the mighty army of " + annexername + " and we could possibly flourish with their established economy. Or we could refuse the union which would surely lead to war, but maybe we can hold them off!\"";
 	sudetenEvent.picture = "GFX_report_event_hitler_parade";
@@ -1079,45 +1079,61 @@ void HoI4Events::addSuppressedEvents(const set<string>& majorIdeologies)
 		politicalEventNumber++;
 	}
 
-	HoI4Event removeNeutral;
-	removeNeutral.type = "country_event";
-	removeNeutral.id = "conv.political." + to_string(politicalEventNumber);
-	removeNeutral.title = "conv.political." + to_string(politicalEventNumber) + ".t";
-	HoI4Localisation::copyEventLocalisations("abandon_neutral.t", removeNeutral.title);
+	int numRelevantIdeologies = 0;
 	for (auto ideology: majorIdeologies)
 	{
 		if ((ideology == "democratic") || (ideology == "neutrality"))
 		{
 			continue;
 		}
-		removeNeutral.description += "	desc = {\n";
-		removeNeutral.description += "		text = political." + to_string(politicalEventNumber) + ".d_" + ideology + "\n";
-		removeNeutral.description += "		trigger = { has_government = " + ideology + " }\n";
-		removeNeutral.description += "	}\n";
-		HoI4Localisation::copyEventLocalisations("abandon_neutral.d_" + ideology, "conv.political." + to_string(politicalEventNumber) + "_" + ideology);
+		numRelevantIdeologies++;
 	}
-	if (removeNeutral.description.size() > 0)
+	if (numRelevantIdeologies > 0)
 	{
-		removeNeutral.description = removeNeutral.description.substr(8, removeNeutral.description.size() - 9);
+		HoI4Event removeNeutral;
+		removeNeutral.type = "country_event";
+		removeNeutral.id = "conv.political." + to_string(politicalEventNumber);
+		removeNeutral.title = "conv.political." + to_string(politicalEventNumber) + ".t";
+		HoI4Localisation::copyEventLocalisations("abandon_neutral.t", removeNeutral.title);
+		for (auto ideology: majorIdeologies)
+		{
+			if ((ideology == "democratic") || (ideology == "neutrality"))
+			{
+				continue;
+			}
+			removeNeutral.description += "	desc = {\n";
+			removeNeutral.description += "		text = political." + to_string(politicalEventNumber) + ".d_" + ideology + "\n";
+			removeNeutral.description += "		trigger = { has_government = " + ideology + " }\n";
+			removeNeutral.description += "	}\n";
+			HoI4Localisation::copyEventLocalisations("abandon_neutral.d_" + ideology, "conv.political." + to_string(politicalEventNumber) + "_" + ideology);
+		}
+		if (removeNeutral.description.size() > 0)
+		{
+			removeNeutral.description = removeNeutral.description.substr(8, removeNeutral.description.size() - 9);
+		}
+		removeNeutral.picture = "GFX_report_event_journalists_speech";
+		removeNeutral.majorEvent = false;
+		removeNeutral.triggeredOnly = false;
+		removeNeutral.trigger = "OR = {\n";
+		for (auto ideology: majorIdeologies)
+		{
+			if ((ideology == "democratic") || (ideology == "neutrality"))
+			{
+				continue;
+			}
+			removeNeutral.trigger += "			has_government = " + ideology + "\n";
+		}
+		removeNeutral.trigger += "		}\n";
+		removeNeutral.trigger += "		has_idea = neutrality_idea";
+		removeNeutral.meanTimeToHappen = "days = 2";
+		string option = "name = ";
+		string optionName = "conv.political." + to_string(politicalEventNumber) + ".a";
+		option += optionName + "\n";
+		HoI4Localisation::copyEventLocalisations("abandon_neutral.a", optionName);
+		option += "		remove_ideas = neutrality_idea";
+		removeNeutral.options.push_back(option);
+		politicalEvents.push_back(removeNeutral);
 	}
-	removeNeutral.picture = "GFX_report_event_journalists_speech";
-	removeNeutral.majorEvent = false;
-	removeNeutral.triggeredOnly = false;
-	removeNeutral.trigger = "OR = {\n";
-	for (auto ideology: majorIdeologies)
-	{
-		removeNeutral.trigger += "			has_government = " + ideology + "\n";
-	}
-	removeNeutral.trigger += "		}\n";
-	removeNeutral.trigger += "		has_idea = neutrality_idea";
-	removeNeutral.meanTimeToHappen = "days = 2";
-	string option = "name = ";
-	string optionName = "conv.political." + to_string(politicalEventNumber) + ".a";
-	option += optionName + "\n";
-	HoI4Localisation::copyEventLocalisations("abandon_neutral.a", optionName);
-	option += "		remove_ideas = neutrality_idea";
-	removeNeutral.options.push_back(option);
-	politicalEvents.push_back(removeNeutral);
 }
 
 
@@ -1591,7 +1607,7 @@ void HoI4Events::addGovernmentContestedEvent(const set<string>& majorIdeologies,
 }
 
 
-void HoI4Events::addPartyChoiceEvent(string countryTag, set<const V2Party*, function<bool (const V2Party*, const V2Party*)>> parties, HoI4OnActions* onActions)
+void HoI4Events::addPartyChoiceEvent(const string& countryTag, set<const V2Party*, function<bool (const V2Party*, const V2Party*)>> parties, HoI4OnActions* onActions, const set<string>& majorIdeologies)
 {
 	HoI4Event partyChoiceEvent;
 
@@ -1604,7 +1620,17 @@ void HoI4Events::addPartyChoiceEvent(string countryTag, set<const V2Party*, func
 	partyChoiceEvent.picture = "GFX_report_event_usa_election_generic";
 	partyChoiceEvent.triggeredOnly = true;
 	partyChoiceEvent.trigger = "tag = " + countryTag + "\n";
-	partyChoiceEvent.trigger += "		democratic > 0.5";
+	if (majorIdeologies.count("democratic") > 0)
+	{
+		partyChoiceEvent.trigger += "		OR = {";
+		partyChoiceEvent.trigger += "			democratic > 0.5";
+		partyChoiceEvent.trigger += "			neutrality > 0.5";
+		partyChoiceEvent.trigger += "		}";
+	}
+	else
+	{
+		partyChoiceEvent.trigger += "		neutrality > 0.5";
+	}
 
 	char optionLetter = 'a';
 	for (auto party: parties)
@@ -1615,7 +1641,14 @@ void HoI4Events::addPartyChoiceEvent(string countryTag, set<const V2Party*, func
 
 			string optionName = "election." + to_string(electionEventNumber) + optionLetter;
 			string option = "name = " + optionName + "\n";
-			option += "		set_party_name = { ideology = democratic long_name = " + countryTag + "_" + trimmedName + "_party " + "name = " + countryTag + "_" + trimmedName + "_party }\n";
+			if (majorIdeologies.count("democratic") > 0)
+			{
+				option += "		set_party_name = { ideology = democratic long_name = " + countryTag + "_" + trimmedName + "_party " + "name = " + countryTag + "_" + trimmedName + "_party }\n";
+			}
+			else
+			{
+				option += "		set_party_name = { ideology = neutrality long_name = " + countryTag + "_" + trimmedName + "_party " + "name = " + countryTag + "_" + trimmedName + "_party }\n";
+			}
 			option += "		retire_country_leader = yes";
 			partyChoiceEvent.options.push_back(option);
 			HoI4Localisation::addEventLocalisationFromVic2(party->name, optionName);

@@ -92,13 +92,14 @@ HoI4World::HoI4World(const V2World* _sourceWorld):
 	importIdeologies();
 	importLeaderTraits();
 	importIdeologicalIdeas();
+	convertGovernments();
 	identifyMajorIdeologies();
 	importIdeologicalMinisters();
-	convertGovernments();
+	convertParties();
 	events->createPoliticalEvents(majorIdeologies);
 	events->createWarJustificationEvents(majorIdeologies);
 	events->createElectionEvents(majorIdeologies, onActions);
-	addCountryElectionEvents();
+	addCountryElectionEvents(majorIdeologies);
 	addNeutrality();
 	convertIdeologySupport();
 	convertCapitalVPs();
@@ -205,7 +206,7 @@ void HoI4World::convertCountry(pair<string, V2Country*> country, map<int, int>& 
 
 void HoI4World::importIdeologies()
 {
-	if (Configuration::getIdeologiesOptions() != "keep_default")
+	if (Configuration::getIdeologiesOptions() != ideologyOptions::keep_default)
 	{
 		importIdeologyFile("converterIdeologies.txt");
 	}
@@ -273,7 +274,16 @@ void HoI4World::convertGovernments()
 {
 	for (auto country: countries)
 	{
-		country.second->convertGovernment(*sourceWorld, majorIdeologies);
+		country.second->convertGovernment(*sourceWorld);
+	}
+}
+
+
+void HoI4World::convertParties()
+{
+	for (auto country: countries)
+	{
+		country.second->convertParties(majorIdeologies);
 	}
 }
 
@@ -292,7 +302,7 @@ void HoI4World::importIdeologicalIdeas()
 
 void HoI4World::identifyMajorIdeologies()
 {
-	if (Configuration::getIdeologiesOptions() == "keep_major")
+	if (Configuration::getIdeologiesOptions() == ideologyOptions::keep_major)
 	{
 		for (auto greatPower: greatPowers)
 		{
@@ -1550,11 +1560,11 @@ bool HoI4World::governmentsAllowFaction(const string& leaderIdeology, const stri
 }
 
 
-void HoI4World::addCountryElectionEvents()
+void HoI4World::addCountryElectionEvents(const set<string>& majorIdeologies)
 {
 	for (auto country: countries)
 	{
-		events->addPartyChoiceEvent(country.first, country.second->getParties(), onActions);
+		events->addPartyChoiceEvent(country.first, country.second->getParties(), onActions, majorIdeologies);
 	}
 }
 
@@ -1976,6 +1986,30 @@ void HoI4World::outputOnActions() const
 		onActionsFile << "				}\n";
 		onActionsFile << "			}\n";
 	}
+	onActionsFile << "		}\n";
+	onActionsFile << "	}\n";
+
+	onActionsFile << "	on_startup = {\n";
+	onActionsFile << "		effect = {\n";
+	onActionsFile << "			set_province_name = { id = 587 name = \"Köln\"} #Cologne\n";
+	onActionsFile << "			set_province_name = { id = 957 name = \"Vladivostok\"} #Haishenwai\n";
+	onActionsFile << "			set_province_name = { id = 1025 name = \"Kokura\"} #Fukuoka\n";
+	onActionsFile << "			set_province_name = { id = 1047 name = \"Guangzhou\"} #Canton\n";
+	onActionsFile << "			set_province_name = { id = 1182 name = \"Tokyo\"} #Edo\n";
+	onActionsFile << "			set_province_name = { id = 1440 name = \"San Juan\"} #Puerto Rico\n";
+	onActionsFile << "			set_province_name = { id = 1843 name = \"Miami\"} #Tampa\n";
+	onActionsFile << "			set_province_name = { id = 3151 name = \"Leningrad\"} #Saint Petersburg\n";
+	onActionsFile << "			set_province_name = { id = 3152 name = \"Tallinn\"} #Reval\n";
+	onActionsFile << "			set_province_name = { id = 3529 name = \"Stalingrad\"} #Tsaritsyn\n";
+	onActionsFile << "			set_province_name = { id = 4180 name = \"Honolulu\"} #Hawaii\n";
+	onActionsFile << "			set_province_name = { id = 4268 name = \"Nouméa\"} #New Caledonia\n";
+	onActionsFile << "			set_province_name = { id = 4333 name = \"Astana\"} #Qaraganda\n";
+	onActionsFile << "			set_province_name = { id = 4709 name = \"Ürümqi\"} #Díhuà\n";
+	onActionsFile << "			set_province_name = { id = 4801 name = \"Ulaanbaatar\"} #Urga\n";
+	onActionsFile << "			set_province_name = { id = 6115 name = \"Oslo\"} #Christiania\n";
+	onActionsFile << "			set_province_name = { id = 7371 name = \"Kuching\"} #Brunei\n";
+	onActionsFile << "			set_province_name = { id = 11437 name = \"Dnipropetrovsk\"} #Ekaterinoslav\n";
+	onActionsFile << "			set_province_name = { id = 12674 name = \"Reykjavik\"} #Iceland\n";
 	onActionsFile << "		}\n";
 	onActionsFile << "	}\n";
 	onActionsFile << "}\n";

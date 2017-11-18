@@ -94,6 +94,8 @@ class HoI4World
 
 		void convertGovernments();
 
+		void convertParties();
+
 		void importIdeologicalIdeas();
 
 		void identifyMajorIdeologies();
@@ -161,7 +163,7 @@ class HoI4World
 		string returnSphereLeader(const HoI4Country* possibleSphereling) const;
 		bool governmentsAllowFaction(const string& leaderGovernment, const string& allyGovernment) const;
 
-		void addCountryElectionEvents();
+		void addCountryElectionEvents(const set<string>& majorIdeologies);
 
 		void outputCommonCountries() const;
 		void outputColorsfile() const;

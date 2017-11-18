@@ -151,7 +151,7 @@ void HoI4Country::determineFilename()
 }
 
 
-void HoI4Country::convertGovernment(const V2World& sourceWorld, const set<string>& majorIdeologies)
+void HoI4Country::convertGovernment(const V2World& sourceWorld)
 {
 	rulingParty = srcCountry->getRulingParty(sourceWorld.getParties());
 	if (rulingParty == nullptr)
@@ -169,7 +169,11 @@ void HoI4Country::convertGovernment(const V2World& sourceWorld, const set<string
 		string trimmedName = party->name.substr(4, party->name.size());
 		HoI4Localisation::addPoliticalPartyLocalisation(party->name, tag + "_" + trimmedName + "_party");
 	}
+}
 
+
+void HoI4Country::convertParties(const set<string>& majorIdeologies)
+{
 	for (auto HoI4Ideology: majorIdeologies)
 	{
 		for (auto party: parties)
@@ -1246,14 +1250,17 @@ void HoI4Country::outputNamesSet(ofstream& namesFile, const vector<string>& name
 
 void HoI4Country::output(const set<const HoI4Advisor*, advisorCompare>& ideologicalMinisters, const vector<HoI4DivisionTemplateType>& divisionTemplates) const
 {
-	outputHistory();
-	outputOOB(divisionTemplates);
-	outputCommonCountryFile();
-	outputIdeas(ideologicalMinisters);
-
-	if (nationalFocus != nullptr)
+	if (capitalStateNum != 0)
 	{
-		nationalFocus->output("output/" + Configuration::getOutputName() + "/common/national_focus/" + srcCountry->getTag() + "_NF.txt");
+		outputHistory();
+		outputOOB(divisionTemplates);
+		outputCommonCountryFile();
+		outputIdeas(ideologicalMinisters);
+
+		if (nationalFocus != nullptr)
+		{
+			nationalFocus->output("output/" + Configuration::getOutputName() + "/common/national_focus/" + srcCountry->getTag() + "_NF.txt");
+		}
 	}
 }
 

@@ -61,7 +61,8 @@ class HoI4Country
 		void initFromV2Country(const V2World& _srcWorld, const V2Country* _srcCountry, const map<int, int>& stateMap, const map<int, HoI4State*>& states);
 		void initFromHistory();
 		void setGovernmentToExistingIdeology(const set<string>& majorIdeologies, const map<string, HoI4Ideology*>& ideologies);
-		void convertGovernment(const V2World& _srcWorld, const set<string>& majorIdeologies);
+		void convertGovernment(const V2World& _srcWorld);
+		void convertParties(const set<string>& majorIdeologies);
 		void convertIdeologySupport(const set<string>& majorIdeologies);
 		void		convertNavy(const map<string, HoI4UnitMap>& unitMap);
 		void		convertConvoys(const map<string, HoI4UnitMap>& unitMap);
@@ -187,7 +188,7 @@ class HoI4Country
 		map<string, int>					technologies;
 		map<string, int>					researchBonuses;
 		map<string, HoI4Relations*>	relations;
-		Color									color;
+		ConverterColor::Color color;
 		double								nationalUnity;
 		const HoI4Faction*						faction;
 		bool									factionLeader;
